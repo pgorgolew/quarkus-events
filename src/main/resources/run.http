@@ -1,0 +1,10 @@
+### Good message
+POST http://localhost:8080/pubsub?count=1
+
+"test"
+
+
+### Failing message
+POST http://localhost:8080/pubsub?count=1
+
+"test FAIL"
