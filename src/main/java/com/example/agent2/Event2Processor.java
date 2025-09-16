@@ -1,9 +1,7 @@
 package com.example.agent2;
 
-import com.example.PubSubResource;
-import com.example.core.EventProcessor;
+import com.example.core.processor.EventProcessor;
 import com.example.core.Event;
-import io.quarkus.logging.Log;
 import org.jboss.logging.Logger;
 
 import java.util.Map;

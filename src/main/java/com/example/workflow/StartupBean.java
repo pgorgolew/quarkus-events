@@ -4,18 +4,14 @@ import com.example.agent1.Event1Processor;
 import com.example.agent2.Event2Processor;
 import com.example.agent3.Event3Processor;
 import com.example.core.Event;
-import com.example.core.EventMessageCodec;
-import com.example.core.EventProcessor;
+import com.example.core.processor.EventProcessor;
 import com.example.core.publisher.EventPublisher;
-import com.example.core.listener.EventListener;
-import com.example.core.publisher.InMemoryEventPublisher;
-import com.example.core.listener.InMemoryEventListener;
+import com.example.core.consumer.EventConsumer;
 import com.example.core.publisher.PubsubEventPublisher;
-import com.example.core.listener.PubsubEventListener;
+import com.example.core.consumer.PubsubEventConsumer;
 import io.quarkiverse.googlecloudservices.pubsub.QuarkusPubSub;
 import io.quarkus.runtime.Startup;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.MessageCodec;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -45,9 +41,9 @@ public class StartupBean {
 
         config.steps().forEach((stepName, stepConfig) -> {
             EventProcessor eventProcessor = createEventProcessor(stepConfig);
-            EventListener eventListener = createEventReceiver(stepConfig.source());
+            EventConsumer eventConsumer = createEventReceiver(stepConfig.source());
             EventPublisher eventPublisher = createEventPublisher(stepConfig.target());
-            workflowContext.addStep(new Step(stepName, eventProcessor, eventListener, eventPublisher));
+            workflowContext.addStep(new Step(stepName, eventProcessor, eventConsumer, eventPublisher));
         });
 
         workflowContext.start();
@@ -61,10 +57,10 @@ public class StartupBean {
         };
     }
 
-    private EventListener createEventReceiver(WorkflowConfig.Step.Source sourceConfig) {
+    private EventConsumer createEventReceiver(WorkflowConfig.Step.Source sourceConfig) {
         return switch (sourceConfig.type()) {
-            case PUBSUB -> new PubsubEventListener(pubSub, sourceConfig.value());
-            case IN_MEMORY -> new InMemoryEventListener(eventBus, sourceConfig.value());
+            case PUBSUB -> new PubsubEventConsumer(pubSub, sourceConfig.value());
+            case IN_MEMORY -> new InMemoryEventConsumer(eventBus, sourceConfig.value());
         };
     }
 

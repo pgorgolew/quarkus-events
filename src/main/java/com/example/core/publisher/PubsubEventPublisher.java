@@ -12,6 +12,7 @@ import io.quarkiverse.googlecloudservices.pubsub.QuarkusPubSub;
 import jakarta.annotation.PreDestroy;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import static io.quarkus.arc.ComponentsProvider.LOG;
 
@@ -31,18 +32,11 @@ public class PubsubEventPublisher implements EventPublisher {
     public void publish(Event event) {
         ByteString data = ByteString.copyFromUtf8(event.payload());
         PubsubMessage pubsubMessage = PubsubMessage.newBuilder().setData(data).putAllAttributes(event.metadata()).build();
-        ApiFuture<String> messageIdFuture = publisher.publish(pubsubMessage);// Publish the message
-        ApiFutures.addCallback(messageIdFuture, new ApiFutureCallback<String>() {// Wait for message submission and log the result
-            public void onSuccess(String messageId) {
-                LOG.infov("published with message id {0}", messageId);
-                event.consumer().ack();
-            }
-
-            public void onFailure(Throwable t) {
-                LOG.warnv("failed to publish: {0}", t);
-                event.consumer().nack();
-            }
-        }, MoreExecutors.directExecutor());
+        try {
+            publisher.publish(pubsubMessage).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @PreDestroy

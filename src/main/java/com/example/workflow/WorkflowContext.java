@@ -15,6 +15,6 @@ public class WorkflowContext {
     }
 
     public void start(){
-        steps.values().forEach(step -> step.eventListener().listen(step.eventProcessor(), step.eventPublisher()));
+        steps.values().forEach(step -> step.eventConsumer().listen());
     }
 }

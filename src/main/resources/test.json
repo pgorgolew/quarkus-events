@@ -1,0 +1,42 @@
+{
+  "step0": { //-> listener
+    "type": "consumer/mongo",
+    "target": { //publisher
+      "type": "publisher/pubsub",
+      "configuration": {
+        "projectId": "project",
+        "subscription": "subscription" //OR FULL SUBSCRIPTION NAME AND THATS IT
+      }
+    },
+    "configuration": {
+      "database": "db",
+      "collection": "collection"
+    }
+  },
+  "step1": { //-> listener
+    "type": "consumer/pubsub",
+    "target": { //publisher
+      "type": "publisher/step",
+      "configuration": {
+        "stepName": "step2"
+      }
+    },
+    "configuration": {
+      "projectId": "project",
+      "subscription": "subscription" //OR FULL SUBSCRIPTION NAME AND THATS IT
+    }
+  },
+  "step2": { //-> listener
+    "type": "processor/transform/liquid",
+    "target": { //publisher
+      "type": "publisher/step",
+      "configuration": {
+        "stepName": "step2"
+      }
+    },
+    "configuration": {
+      "projectId": "project",
+      "subscription": "subscription" //OR FULL SUBSCRIPTION NAME AND THATS IT
+    }
+  }
+}
